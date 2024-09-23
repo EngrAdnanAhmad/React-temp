@@ -19,10 +19,10 @@ function App() {
 						flexGrow: 1,
 						height: "100vh",
 						backgroundImage:
-							"linear-gradient(to right, rgb(58 158 237), rgb(168 232 247))",
+							"linear-gradient(to right, rgb(215 231 237), rgb(181 204 209))",
 						p: 2,
 					}}>
-					<Toolbar />
+					{/* <Toolbar /> */}
 					<Routes>
 						<Route path="/search" element={<SearchPage />} />
 						<Route path="/dsqs" element={<DSQsPage />} />
