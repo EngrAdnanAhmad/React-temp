@@ -24,7 +24,7 @@ code {
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #2196f3; /* Blue scrollbar */
+    background-color: #649df1; /* Blue scrollbar */
     border-radius: 10px; /* Rounded corners */
     border: 3px solid transparent; /* Adds padding around the thumb */
   }

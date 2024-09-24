@@ -11,162 +11,122 @@ import {
 	Modal,
 	Fade,
 	Backdrop,
-	InputBase,
-	Paper,
 	List,
 	ListItem,
 	ListItemText,
-	Link,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
+	InputBase,
+	Paper,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import CloseIcon from "@mui/icons-material/Close";
 
-const DSQPage = () => {
-	const [queries, setQueries] = useState([
-		{ id: 1, name: "Query 1", query: "SELECT * FROM table1;", result: null },
-		{ id: 2, name: "Query 2", query: "SELECT * FROM table2;", result: null },
-		{ id: 3, name: "Query 3", query: "SELECT * FROM table3;", result: null },
-	]);
+// Static query data with folder, name, and blobpath
+const queries = [
+	{
+		folder: "dip_use_case",
+		name: "count_datasets_keyword_fentanyl.rq",
+		blobpath:
+			"knowledge_graph/sparql/dip_use_case/count_datasets_keyword_fentanyl.rq",
+	},
+	{
+		folder: "dip_use_case",
+		name: "datasets_with_keyword_fentanyl_and_seizure.rq",
+		blobpath:
+			"knowledge_graph/sparql/dip_use_case/datasets_with_keyword_fentanyl_and_seizure.rq",
+	},
+	{
+		folder: "dip_use_case",
+		name: "datasets_with_keyword_fentanyl_and_seizure.rq",
+		blobpath:
+			"knowledge_graph/sparql/dip_use_case/datasets_with_keyword_fentanyl_and_seizure.rq",
+	},
+	{
+		folder: "fentanyl_use_case",
+		name: "fentanyl_quantity_by_form.rq",
+		blobpath:
+			"knowledge_graph/sparql/fentanyl_use_case/fentanyl_quantity_by_form.rq",
+	},
+	{
+		folder: "fentanyl_use_case",
+		name: "fentanyl_quantity_by_form.rq",
+		blobpath:
+			"knowledge_graph/sparql/fentanyl_use_case/fentanyl_quantity_by_form.rq",
+	},
+	{
+		folder: "utilities",
+		name: "TotalNumberClasses.rq",
+		blobpath: "knowledge_graph/sparql/utilities/TotalNumberClasses.rq",
+	},
+];
 
+// Group queries by folder
+const groupQueriesByFolder = (queries) => {
+	return queries.reduce((acc, query) => {
+		if (!acc[query.folder]) {
+			acc[query.folder] = [];
+		}
+		acc[query.folder].push(query);
+		return acc;
+	}, {});
+};
+
+const DSQPage = () => {
 	const [currentEdit, setCurrentEdit] = useState(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [results, setResults] = useState({});
 	const [activeResult, setActiveResult] = useState(null); // To track which query's result is active
-	const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering queries
+	const [searchTerm, setSearchTerm] = useState("");
 
-	// Dummy API request (simulating different response formats)
-	const runQuery = (queryId) => {
-		const query = queries.find((q) => q.id === queryId);
-
-		// Simulate different response types
+	// Simulated "run" query button click
+	const runQuery = (queryName) => {
+		// Simulated result
 		setTimeout(() => {
-			let mockResponse;
-			if (queryId === 1) {
-				mockResponse = {
-					success: true,
-					data: {
-						type: "urlList",
-						data: [
-							"http://www.lorenispum.com/somedummyurls",
-							"http://www.lorenispumtex.com/somedummyurlsfortesting",
-							"http://www.urloflorenispum.com/urlofsomedummyurls",
-						],
-					},
-				};
-			} else if (queryId === 2) {
-				mockResponse = {
-					success: true,
-					data: {
-						type: "keywordTable",
-						data: [
-							{ keyWordBEValue: "Screening", totalDatasets: 4 },
-							{ keyWordBEValue: "Data Model", totalDatasets: 3 },
-							{ keyWordBEValue: "System", totalDatasets: 3 },
-						],
-					},
-				};
-			} else if (queryId === 3) {
-				mockResponse = {
-					success: true,
-					data: {
-						message: `Plain text result for ${query.name}`,
-						type: "text",
-					},
-				};
-			}
-
+			const mockResponse = {
+				message: `Results for ${queryName}`,
+			};
 			setResults((prevResults) => ({
-				[queryId]: mockResponse.data,
+				...prevResults,
+				[queryName]: mockResponse,
 			}));
-			setActiveResult(queryId); // Show the result on the right side
+			setActiveResult(queryName); // Show the result
 		}, 1000);
 	};
 
-	const handleEdit = (queryId) => {
-		const queryToEdit = queries.find((q) => q.id === queryId);
-		setCurrentEdit(queryToEdit);
+	// Open edit modal
+	const handleEdit = (query) => {
+		setCurrentEdit(query);
 		setIsModalOpen(true);
 	};
 
+	// Save edited query
 	const saveQuery = () => {
-		const updatedQueries = queries.map((q) =>
-			q.id === currentEdit.id ? { ...q, query: currentEdit.query } : q,
-		);
-		setQueries(updatedQueries);
 		setIsModalOpen(false);
+		// In a real-world scenario, we would update the query in the data source here
 	};
-
-	// Filter queries based on search term
-	const filteredQueries = queries.filter((query) =>
-		query.name.toLowerCase().includes(searchTerm.toLowerCase()),
-	);
 
 	const handleCloseModal = () => {
 		setIsModalOpen(false);
 	};
 
-	// Render different types of results
-	const renderResult = (result) => {
-		if (!result || !result.type) return <Typography>No results available</Typography>;
+	// Filtered queries based on search term
+	const filteredQueries = queries.filter((query) =>
+		query.name.toLowerCase().includes(searchTerm.toLowerCase()),
+	);
 
-		if (result.type === "urlList") {
-			return (
-				<List>
-					{result.data.map((url, index) => (
-						<ListItem key={index}>
-							<Link href={url} target="_blank" rel="noopener">
-								<ListItemText primary={url} />
-							</Link>
-						</ListItem>
-					))}
-				</List>
-			);
-		} else if (result.type === "keywordTable") {
-			return (
-				<TableContainer>
-					<Table>
-						<TableHead>
-							<TableRow>
-								<TableCell>Keyword</TableCell>
-								<TableCell>Total Datasets</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{result.data.map((row, index) => (
-								<TableRow key={index}>
-									<TableCell>{row.keyWordBEValue}</TableCell>
-									<TableCell>{row.totalDatasets}</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</TableContainer>
-			);
-		} else if (result.type === "text") {
-			return <Typography>{result.message}</Typography>;
-		}
-
-		return null;
-	};
+	const groupedQueries = groupQueriesByFolder(filteredQueries);
 
 	return (
 		<Box sx={{ padding: "20px" }}>
 			<Grid container spacing={3}>
-				{/* Query List and Search Filter */}
+				{/* Query List with Folders */}
 				<Grid item xs={12} sm={4}>
 					<Typography variant="h5" sx={{ mb: 2 }}>
-						Search DSQs
+						Search Queries
 					</Typography>
 					<Paper
 						sx={{
-							marginRight:"7px",
+							marginRight: "18px",
 							p: "2px 4px",
 							display: "flex",
 							alignItems: "center",
@@ -180,32 +140,75 @@ const DSQPage = () => {
 							onChange={(e) => setSearchTerm(e.target.value)}
 						/>
 					</Paper>
-					<Box sx={{ height: "75vh", overflowY: "auto", pr: 1 }}>
-						{filteredQueries.map((query) => (
-							<Card
-								key={query.id}
-								sx={{
-									marginBottom: "10px",
-									position: "relative",
-									paddingRight: "60px", // Ensures space for the icons
-								}}>
-								<CardContent>
-									<Typography variant="h6">{query.name}</Typography>
-									<Typography variant="body2" color="text.secondary">
-										{query.query}
-									</Typography>
-									<Box sx={{ position: "absolute", top: "8px", right: "8px" }}>
-										<IconButton
-											onClick={() => handleEdit(query.id)}
-											size="small">
-											<EditIcon />
-										</IconButton>
-										<IconButton onClick={() => runQuery(query.id)}>
-											<PlayArrowIcon />
-										</IconButton>
-									</Box>
-								</CardContent>
-							</Card>
+					<Box
+						className="custom-scrollbar"
+						sx={{ height: "80vh", overflowY: "auto", pr: 1 }}>
+						{Object.entries(groupedQueries).map(([folder, queries]) => (
+							<Box key={folder} sx={{ marginBottom: "20px" }}>
+								<Typography variant="h6" sx={{ fontWeight: "bold" }}>
+									{folder}
+								</Typography>
+								<List>
+									{queries.map((query, index) => (
+										<Card
+											key={index}
+											sx={{
+												marginBottom: "10px",
+												position: "relative",
+												paddingRight: "60px", // Ensures space for the icons
+											}}>
+											<CardContent>
+												<ListItemText
+													primary={
+														<Typography
+															sx={{
+																whiteSpace: "nowrap",
+																overflow: "hidden",
+																textOverflow: "ellipsis",
+																maxWidth: "90%", // Limit text width
+																fontWeight: "bold",
+															}}
+															title={query.name}>
+															{query.name}
+														</Typography>
+													}
+													secondary={
+														<Typography
+															sx={{
+																whiteSpace: "nowrap",
+																overflow: "hidden",
+																textOverflow: "ellipsis",
+																maxWidth: "90%", // Limit text width
+																fontStyle: "italic",
+															}}
+															title={query.blobpath} // Display full text on hover
+														>
+															{query.blobpath}
+														</Typography>
+													}
+												/>
+												<Box
+													sx={{
+														position: "absolute",
+														top: "8px",
+														right: "8px",
+													}}>
+													<IconButton
+														onClick={() => handleEdit(query)}
+														size="small">
+														<EditIcon />
+													</IconButton>
+													<IconButton
+														onClick={() => runQuery(query.name)}
+														size="small">
+														<PlayArrowIcon />
+													</IconButton>
+												</Box>
+											</CardContent>
+										</Card>
+									))}
+								</List>
+							</Box>
 						))}
 					</Box>
 				</Grid>
@@ -252,10 +255,7 @@ const DSQPage = () => {
 								fullWidth
 								multiline
 								rows={5}
-								value={currentEdit?.query || ""}
-								onChange={(e) =>
-									setCurrentEdit({ ...currentEdit, query: e.target.value })
-								}
+								value={currentEdit?.name || ""}
 								sx={{ marginBottom: 2 }}
 							/>
 							<Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
@@ -282,7 +282,9 @@ const DSQPage = () => {
 						{activeResult && (
 							<Card sx={{ mb: 2 }}>
 								<CardContent>
-									{renderResult(results[activeResult])}
+									<Typography variant="body1">
+										{results[activeResult]?.message || "No results yet"}
+									</Typography>
 								</CardContent>
 							</Card>
 						)}
